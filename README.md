@@ -5,9 +5,10 @@ Turn all Chinese words on your android screen into spaces.
 ![Screen Shot](Screenshot.jpg)
 
 ### How I made it
-coming soon...
+https://youtu.be/EnNyQYi-8gQ
+https://youtu.be/JyAIHhqtUy4
 
-### Tech Challenging
+### Tech Challenges
 #### sharedPreferences
 1. in your activity, do this every time after configuring commitment:
 ```kotlin
