@@ -1,12 +1,25 @@
 package xyz.yingshaoxo.nomorechinese
 
+import android.Manifest
+import android.app.AndroidAppHelper
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.single.PermissionListener
 
 
 class MainActivity : AppCompatActivity() {
@@ -14,34 +27,50 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var sharedPref = this?.getSharedPreferences("main", Context.MODE_PRIVATE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            //setWorldReadable()
-        } else {
-            sharedPref = this?.getSharedPreferences("main", Context.MODE_WORLD_READABLE)
-        }
-        val switch_status = sharedPref.getBoolean("switch", true)
-
+        var switch_status = true
         global_switch.isChecked = switch_status
-        global_switch.setOnCheckedChangeListener { _, isChecked ->
-            with (sharedPref.edit()) {
-                this.putBoolean("switch", isChecked)
-                this.commit()
-            }
-            setWorldReadable()
-        }
-    }
 
-    fun setWorldReadable() {
-        val dataDir = File(this.getApplicationInfo().dataDir)
-        val prefsDir = File(dataDir, "shared_prefs")
-        val prefsFile = File(prefsDir, "main" + ".xml")
-        if (prefsFile.exists()) {
-            //Toast.makeText(this, prefsFile.path.toString(), Toast.LENGTH_LONG).show()
-            for (file in arrayOf<File>(dataDir, prefsDir, prefsFile)) {
-                file.setReadable(true, false)
-                file.setExecutable(true, false)
-            }
-        }
+        Dexter.withActivity(this)
+            .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(response: PermissionGrantedResponse) {/* ... */
+                    val file = File(this@MainActivity.getExternalFilesDir(null), "config.txt")
+                    /*
+                    Toast.makeText(
+                        this@MainActivity,
+                        file.toString(),
+                        Toast.LENGTH_LONG
+                    ).show()
+                     */
+                    if (file.exists()) {
+                        var data = file.readText().toString()
+                        if (data.contains("true")) {
+                            switch_status = true
+                        } else {
+                            switch_status = false
+                        }
+                    } else {
+                        file.writeText(switch_status.toString().toLowerCase())
+                    }
+
+                    global_switch.setOnCheckedChangeListener { _, isChecked ->
+                        file.writeText(isChecked.toString().toLowerCase())
+                    }
+                }
+
+                override fun onPermissionDenied(response: PermissionDeniedResponse) {/* ... */
+                    Toast.makeText(
+                        this@MainActivity,
+                        "I won't work unless you give me all those permissions!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permission: PermissionRequest,
+                    token: PermissionToken
+                ) {/* ... */
+                }
+            }).check()
     }
 }
