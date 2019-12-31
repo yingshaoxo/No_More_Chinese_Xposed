@@ -10,7 +10,10 @@ https://youtu.be/EnNyQYi-8gQ
 https://youtu.be/JyAIHhqtUy4
 
 ### Tech Challenges
-#### sharedPreferences
+#### Use getExternalStorageDir() to save text files
+Otherwise, you couldn't be able to save any files in android P and Q
+
+#### sharedPreferences | It's not working since android P and Q
 1. in your activity, do this every time after configuring commitment:
 ```kotlin
     fun setWorldReadable() {

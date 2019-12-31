@@ -33,7 +33,6 @@ class Actions : IXposedHookLoadPackage {
             val file_path = "/storage/emulated/0/Android/data/xyz.yingshaoxo.nomorechinese/files/config.txt"
             if (File(file_path).exists()) {
                 var data = File(file_path).readText().toString()
-                XposedBridge.log(data.toString());
                 if (data.contains("true")) {
                     switch_status = true
                 }
